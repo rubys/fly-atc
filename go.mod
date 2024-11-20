@@ -1,4 +1,4 @@
-module github.com/basecamp/thruster
+module github.com/rubys/fly-atc
 
 go 1.23.3
 

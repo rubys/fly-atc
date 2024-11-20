@@ -1,13 +1,13 @@
 require "rubygems/package_task"
 
 NATIVE_PLATFORMS = {
-  "arm64-darwin" => "dist/thrust-darwin-arm64",
-  "x86_64-darwin" => "dist/thrust-darwin-amd64",
-  "x86_64-linux" => "dist/thrust-linux-amd64",
-  "aarch64-linux" => "dist/thrust-linux-arm64",
+  "arm64-darwin" => "dist/fly-atc-darwin-arm64",
+  "x86_64-darwin" => "dist/fly-atc-darwin-amd64",
+  "x86_64-linux" => "dist/fly-atc-linux-amd64",
+  "aarch64-linux" => "dist/fly-atc-linux-arm64",
 }
 
-BASE_GEMSPEC = Bundler.load_gemspec("thruster.gemspec")
+BASE_GEMSPEC = Bundler.load_gemspec("fly-atc.gemspec")
 
 gem_path = Gem::PackageTask.new(BASE_GEMSPEC).define
 desc "Build the ruby gem"
@@ -24,7 +24,7 @@ task :gem => "build:native"
 NATIVE_PLATFORMS.each do |platform, executable|
   BASE_GEMSPEC.dup.tap do |gemspec|
     exedir = File.join(gemspec.bindir, platform)
-    exepath = File.join(exedir, "thrust")
+    exepath = File.join(exedir, "fly-atc")
 
     gemspec.platform = platform
     gemspec.files << exepath

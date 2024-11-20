@@ -1,99 +1,96 @@
-# Thruster
+# fly-atc
 
-Thruster is an HTTP/2 proxy for simple production-ready deployments of Rails
-applications. It runs alongside the Puma webserver to provide a few additional
-features that help your app run efficiently and safely on the open Internet:
+A SaaS toolkit for converting a personal application into a efficient, siloed, multi-tenant application, where each user of your application is assigned a dedicated virtual machine.
 
-- HTTP/2 support
-- Automatic TLS certificate management with Let's Encrypt
-- Basic HTTP caching of public assets
-- X-Sendfile support and compression, to efficiently serve static files
-
-Thruster aims to be as zero-config as possible. It has no configuration file,
-and most features are automatically enabled with sensible defaults. The goal is
-that simply running your Puma server with Thruster should be enough to get a
-production-ready setup.
-
-The only exception to this is TLS provisioning: in order for Thruster to
-provision TLS certificates, it needs to know which domain those certificates
-should be for. So to use TLS, you need to set the `TLS_DOMAIN` environment
-variable. If you don't set this variable, Thruster will run in HTTP-only mode.
-
-Thruster also wraps the Puma process so that you can use it without managing
-multiple processes yourself. This is particularly useful when running in a
-containerized environment, where you typically won't have a process manager
-available to coordinate the processes. Instead you can use Thruster as your
-`CMD`, and it will manage Puma for you.
-
-Thruster was originally created for the [ONCE](https://once.com) project, where
-we wanted a no-fuss way to serve a Rails application from a single container,
-directly on the open Internet. We've since found it useful for simple
-deployments of other Rails applications.
-
-
-## Installation
-
-Thruster is distributed as a Ruby gem. Because Thruster is written in Go, we
-provide several pre-built platform-specific binaries. Installing the gem will
-automatically fetch the appropriate binary for your platform.
-
-To install it, add it to your application's Gemfile:
-
-```ruby
-gem 'thruster'
-```
-
-Or install it globally:
-
-```sh
-$ gem install thruster
-```
-
+** Work in Progress **
 
 ## Usage
 
-To run your Puma application inside Thruster, prefix your usual command string
-with `thrust`. For example:
+This is all TBD at this point, but for Rails projects it is likely to go something like this:
 
-```sh
-$ thrust bin/rails server
-```
+* Replace thruster with fly-atc in Gemfile and Dockerfile
+* Define your tenants in a config file, probably YAML.
 
-Or with automatic TLS:
+For non-Rails projects, the process is likely going to be similar:
 
-```sh
-$ TLS_DOMAIN=myapp.example.com thrust bin/rails server
-```
+* Follow the instructions for using thruster with your framework, but substitute fly-atc for thruster.
+* Define your tenants in a config file, probably YAML but JSON could also be supported.
 
+Fly.io's dockerfile generators will be able to help with this.
 
-## Custom configuration
+For approximately $1 US per month, you can run:
+  * [1 performance machine with 2Gb of RAM, 10GB of bandwidth, and 5GB of storage for 15 hours/month](https://fly.io/calculator?m=0_0_0_0_0&f=c&b=iad.10&a=no_none&r=shared_0_1_iad&t=10_100_5&u=0_1_100&g=1_performance_15_1_2048_iad_1024_0).
+  * [1 shared machine with 1Gb of RAM, 10GB of bandwidth, and 5GB of storage for 80 hours/month](https://fly.io/calculator?m=0_0_0_0_0&f=c&b=iad.10&a=no_none&r=shared_0_1_iad&t=10_100_5&u=0_1_100&g=1_shared_80_1_1048_iad_1024_0).
 
-In most cases, Thruster should work out of the box with no additional
-configuration. But if you need to customize its behavior, there are a few
-environment variables that you can set.
+Vertical scaling can be achieved by adding more machines.
 
-| Variable Name         | Description                                             | Default Value |
-|-----------------------|---------------------------------------------------------|---------------|
-| `TLS_DOMAIN`          | Comma-separated list of domain names to use for TLS provisioning. If not set, TLS will be disabled. | None |
-| `TARGET_PORT`         | The port that your Puma server should run on. Thruster will set `PORT` to this value when starting your server. | 3000 |
-| `CACHE_SIZE`          | The size of the HTTP cache in bytes. | 64MB |
-| `MAX_CACHE_ITEM_SIZE` | The maximum size of a single item in the HTTP cache in bytes. | 1MB |
-| `X_SENDFILE_ENABLED`  | Whether to enable X-Sendfile support. Set to `0` or `false` to disable. | Enabled |
-| `MAX_REQUEST_BODY`    | The maximum size of a request body in bytes. Requests larger than this size will be refused; `0` means no maximum size is enforced. | `0` |
-| `STORAGE_PATH`        | The path to store Thruster's internal state. Provisioned TLS certificates will be stored here, so that they will not need to be requested every time your application is started. | `./storage/thruster` |
-| `BAD_GATEWAY_PAGE`    | Path to an HTML file to serve when the backend server returns a 502 Bad Gateway error. If there is no file at the specific path, Thruster will serve an empty 502 response instead. Because Thruster boots very quickly, a custom page can be a useful way to show that your application is starting up. | `./public/502.html` |
-| `HTTP_PORT`           | The port to listen on for HTTP traffic. | 80 |
-| `HTTPS_PORT`          | The port to listen on for HTTPS traffic. | 443 |
-| `HTTP_IDLE_TIMEOUT`   | The maximum time in seconds that a client can be idle before the connection is closed. | 60 |
-| `HTTP_READ_TIMEOUT`   | The maximum time in seconds that a client can take to send the request headers and body. | 30 |
-| `HTTP_WRITE_TIMEOUT`  | The maximum time in seconds during which the client must read the response. | 30 |
-| `ACME_DIRECTORY`      | The URL of the ACME directory to use for TLS certificate provisioning. | `https://acme-v02.api.letsencrypt.org/directory` (Let's Encrypt production) |
-| `EAB_KID`             | The EAB key identifier to use when provisioning TLS certificates, if required. | None |
-| `EAB_HMAC_KEY`        | The Base64-encoded EAB HMAC key to use when provisioning TLS certificates, if required. | None |
-| `FORWARD_HEADERS`     | Whether to forward X-Forwarded-* headers from the client. | Disabled when running with TLS; enabled otherwise |
-| `DEBUG`               | Set to `1` or `true` to enable debug logging. | Disabled |
+## Motivation
 
-To prevent naming clashes with your application's own environment variables,
-Thruster's environment variables can optionally be prefixed with `THRUSTER_`.
-For example, `TLS_DOMAIN` can also be written as `THRUSTER_TLS_DOMAIN`. Whenever
-a prefixed variable is set, it will take precedence over the unprefixed version.
+I've been running my [Showcase](https://github.com/rubys/showcase?tab=readme-ov-file#showcase) software for nearly three years.  Things have changed over time that I now want to take advantage of.  I want take the opportunity to package those changes in the form of a toolkit that others can take advantage of.
+
+From Wikipedia description of [SaaS](https://en.wikipedia.org/wiki/Software_as_a_service):
+
+> SaaS customers have the abstraction of limitless computing resources, while [economy of scale](https://en.wikipedia.org/wiki/Economy_of_scale) drives down the cost. SaaS architectures are typically [multi-tenant](https://en.wikipedia.org/wiki/Multi-tenant); usually they share resources between clients for efficiency, but sometimes they offer a siloed environment for an additional fee.
+
+The focus of this toolkit is efficient, siloed, multi-tenant applications *with no changes to the application*, taking advantage of:
+
+* [Auto-suspend](https://community.fly.io/t/autosuspend-is-here-machine-suspension-is-enabled-everywhere/20942) -  Virtual Machines that pop into existence when needed and disappear when not in use.
+* [SQLite ready for production](https://rubyonrails.org/2024/11/7/rails-8-no-paas-required#getting-sqlite-ready-for-production) - raw performance coupled with operational compression of complexity; see [Supercharge the One Person Framework with SQLite: Rails World 2024](https://fractaledmind.github.io/2024/10/16/sqlite-supercharges-rails/).
+* [Litestream](https://litestream.io/) -  No-worry backups.  Virtual machines can be literally destroyed and recreated elsewhere and start back up exactly where they left off.
+* [Tigris Global Storage](https://fly.io/docs/tigris/) - globally caching, S3-compatible object storage.
+
+That's a lot of moving parts.  I've documented my [current architecture](https://github.com/rubys/showcase/blob/main/ARCHITECTURE.md) and published a [blueprint](https://fly.io/docs/blueprints/shared-nothing/).
+
+The goal of fly-atc is to enable you configure multiple tenants and then not worry about this further, enabling you to focus on your application.
+
+## Approach
+
+For illustrative purposes consider a SaaS Calender application implemented in Ruby on Rails using SQLite3 as the database.  (My showcase application is a bit more involved than a calendar, but those details aren't important).
+
+Key concepts:
+
+* Each user/customer has a primarly location, and is assigned a single machine near that location.  Such machines can be accessed from anywhere, but have lower latency near that location.
+* Each user can have multiple calendars.  Each calendar is associated with a single tenant on the user's machine.  Each tenant consists a running instance of the web server application with one ([or more](https://rubyonrails.org/2024/11/7/rails-8-no-paas-required#a-solid-reduction-of-dependencies)) databases.
+
+With that in mind, consider the following URL paths:
+
+* `/bellevue/2025/winter/`
+* `/bellevue/2025/summer-medal-ball/`
+* `/bellevue/2025/summer-showcase/`
+* `/boston/2025/april/`
+* `/boston/2025/mini-comp/`
+* `/boston/2025/october/`
+* `/livermore/2025/the-music-of-prince/`
+* `/livermore/2025/james-bond/`
+* `/raleigh/2025/disney/`
+* `/raleigh/2025/in-house/`
+
+The first segment of the path identifies the user, and therefore the machine.  The next two segments combined identify the tenant on that machine.  This is but a subset of the planned showcases, you can see a [full list](https://smooth.fly.dev/showcase/) or even a [map](https://smooth.fly.dev/showcase/regions/) (click on the arrows under the map to move to different continents).
+
+`fly-atc`'s responsibilities are to:
+* Route requests to the correct machine
+* Ensure databases are present/restored from backup
+* Start/stop tenants as required
+* Hand off requests to tenants
+
+Rails 8 introduces [thruster](https://rubyonrails.org/2024/11/7/rails-8-no-paas-required#enter-kamal-2--thruster).  `fly-atc` is a replacement for thruster:
+  * thruster requires no configuration, is limited to a single tenant.
+  * fly-atc enables multiple tenants, based on your configuration.
+
+## Implementation
+
+Based on:
+* [Thruster](https://github.com/basecamp/thruster) ([announcement](https://dev.37signals.com/thruster-released/))
+* [tinyrp](https://github.com/pgaijin66/tinyrp) ([docs](https://prabeshthapa.medium.com/learn-reverse-proxy-by-creating-one-yourself-using-go-87be2a29d1e))
+
+Near term plans:
+
+* Remove certificate/https support
+* Add launch on request / shutdown on idle
+* Add [fly-replay](https://fly.io/docs/networking/dynamic-request-routing/)
+
+On the radar:
+
+* Support for targets other than fly.io.
+* Support for platforms other than Rails, likely starting with Node, and focusing on popular ORMs: [Prisma](https://www.prisma.io/), [TypeORM](https://typeorm.io/), and [Sequelize](https://sequelize.org/).
+* Dashboard.  One should be able to deploy new users and make other configuration changes using only your cell phone.  I [do this today](https://github.com/rubys/showcase/blob/main/ARCHITECTURE.md#administration) with my showcase application.

@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"net"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -16,11 +16,23 @@ type Server struct {
 	httpsServer *http.Server
 }
 
-func NewServer(config *Config, handler http.Handler) *Server {
-	return &Server{
-		handler: handler,
-		config:  config,
+func NewServer(config *Config) *Server {
+	server := &Server{
+		config: config,
 	}
+
+	handlerOptions := HandlerOptions{
+		cache:                    server.cache(),
+		targetUrl:                server.targetUrl(),
+		xSendfileEnabled:         config.XSendfileEnabled,
+		maxCacheableResponseBody: config.MaxCacheItemSizeBytes,
+		maxRequestBody:           config.MaxRequestBody,
+		badGatewayPage:           config.BadGatewayPage,
+	}
+
+	server.handler = NewHandler(handlerOptions)
+
+	return server
 }
 
 func (s *Server) Start() {
@@ -57,14 +69,13 @@ func (s *Server) defaultHttpServer(addr string) *http.Server {
 	}
 }
 
-func httpRedirectHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Connection", "close")
+// Private
 
-	host, _, err := net.SplitHostPort(r.Host)
-	if err != nil {
-		host = r.Host
-	}
+func (s *Server) cache() Cache {
+	return NewMemoryCache(s.config.CacheSizeBytes, s.config.MaxCacheItemSizeBytes)
+}
 
-	url := "https://" + host + r.URL.RequestURI()
-	http.Redirect(w, r, url, http.StatusMovedPermanently)
+func (s *Server) targetUrl() *url.URL {
+	url, _ := url.Parse(fmt.Sprintf("http://localhost:%d", s.config.TargetPort))
+	return url
 }

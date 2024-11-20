@@ -3,7 +3,6 @@ package internal
 import (
 	"fmt"
 	"log/slog"
-	"net/url"
 	"os"
 )
 
@@ -18,17 +17,7 @@ func NewService(config *Config) *Service {
 }
 
 func (s *Service) Run() int {
-	handlerOptions := HandlerOptions{
-		cache:                    s.cache(),
-		targetUrl:                s.targetUrl(),
-		xSendfileEnabled:         s.config.XSendfileEnabled,
-		maxCacheableResponseBody: s.config.MaxCacheItemSizeBytes,
-		maxRequestBody:           s.config.MaxRequestBody,
-		badGatewayPage:           s.config.BadGatewayPage,
-	}
-
-	handler := NewHandler(handlerOptions)
-	server := NewServer(s.config, handler)
+	server := NewServer(s.config)
 	upstream := NewUpstreamProcess(s.config.UpstreamCommand, s.config.UpstreamArgs...)
 
 	server.Start()
@@ -43,17 +32,6 @@ func (s *Service) Run() int {
 	}
 
 	return exitCode
-}
-
-// Private
-
-func (s *Service) cache() Cache {
-	return NewMemoryCache(s.config.CacheSizeBytes, s.config.MaxCacheItemSizeBytes)
-}
-
-func (s *Service) targetUrl() *url.URL {
-	url, _ := url.Parse(fmt.Sprintf("http://localhost:%d", s.config.TargetPort))
-	return url
 }
 
 func (s *Service) setEnvironment() {

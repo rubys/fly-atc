@@ -21,6 +21,10 @@ func main() {
 
 	setLogger(config.LogLevel)
 
+	server := internal.NewServer(config)
+	server.Start()
+	defer server.Stop()
+
 	service := internal.NewService(config)
 	os.Exit(service.Run())
 }

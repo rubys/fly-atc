@@ -7,8 +7,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"golang.org/x/crypto/acme"
 )
 
 const (
@@ -23,12 +21,9 @@ const (
 	defaultMaxCacheItemSizeBytes = 1 * MB
 	defaultMaxRequestBody        = 0
 
-	defaultACMEDirectoryURL = acme.LetsEncryptURL
-	defaultStoragePath      = "./storage/thruster"
-	defaultBadGatewayPage   = "./public/502.html"
+	defaultBadGatewayPage = "./public/502.html"
 
 	defaultHttpPort         = 80
-	defaultHttpsPort        = 443
 	defaultHttpIdleTimeout  = 60 * time.Second
 	defaultHttpReadTimeout  = 30 * time.Second
 	defaultHttpWriteTimeout = 30 * time.Second
@@ -46,20 +41,12 @@ type Config struct {
 	XSendfileEnabled      bool
 	MaxRequestBody        int
 
-	TLSDomains       []string
-	ACMEDirectoryURL string
-	EAB_KID          string
-	EAB_HMACKey      string
-	StoragePath      string
-	BadGatewayPage   string
+	BadGatewayPage string
 
 	HttpPort         int
-	HttpsPort        int
 	HttpIdleTimeout  time.Duration
 	HttpReadTimeout  time.Duration
 	HttpWriteTimeout time.Duration
-
-	ForwardHeaders bool
 
 	LogLevel slog.Level
 }
@@ -84,15 +71,9 @@ func NewConfig() (*Config, error) {
 		XSendfileEnabled:      getEnvBool("X_SENDFILE_ENABLED", true),
 		MaxRequestBody:        getEnvInt("MAX_REQUEST_BODY", defaultMaxRequestBody),
 
-		TLSDomains:       getEnvStrings("TLS_DOMAIN", []string{}),
-		ACMEDirectoryURL: getEnvString("ACME_DIRECTORY", defaultACMEDirectoryURL),
-		EAB_KID:          getEnvString("EAB_KID", ""),
-		EAB_HMACKey:      getEnvString("EAB_HMAC_KEY", ""),
-		StoragePath:      getEnvString("STORAGE_PATH", defaultStoragePath),
-		BadGatewayPage:   getEnvString("BAD_GATEWAY_PAGE", defaultBadGatewayPage),
+		BadGatewayPage: getEnvString("BAD_GATEWAY_PAGE", defaultBadGatewayPage),
 
 		HttpPort:         getEnvInt("HTTP_PORT", defaultHttpPort),
-		HttpsPort:        getEnvInt("HTTPS_PORT", defaultHttpsPort),
 		HttpIdleTimeout:  getEnvDuration("HTTP_IDLE_TIMEOUT", defaultHttpIdleTimeout),
 		HttpReadTimeout:  getEnvDuration("HTTP_READ_TIMEOUT", defaultHttpReadTimeout),
 		HttpWriteTimeout: getEnvDuration("HTTP_WRITE_TIMEOUT", defaultHttpWriteTimeout),
@@ -100,13 +81,7 @@ func NewConfig() (*Config, error) {
 		LogLevel: logLevel,
 	}
 
-	config.ForwardHeaders = getEnvBool("FORWARD_HEADERS", !config.HasTLS())
-
 	return config, nil
-}
-
-func (c *Config) HasTLS() bool {
-	return len(c.TLSDomains) > 0
 }
 
 func findEnv(key string) (string, bool) {

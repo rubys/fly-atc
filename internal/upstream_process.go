@@ -21,20 +21,25 @@ func NewUpstreamProcess(name string, arg ...string) *UpstreamProcess {
 	}
 }
 
-func (p *UpstreamProcess) Run() (int, error) {
+func (p *UpstreamProcess) Start() error {
 	p.cmd.Stdin = os.Stdin
 	p.cmd.Stdout = os.Stdout
 	p.cmd.Stderr = os.Stderr
 
 	err := p.cmd.Start()
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	p.Started <- struct{}{}
 
 	go p.handleSignals()
-	err = p.cmd.Wait()
+
+	return nil
+}
+
+func (p *UpstreamProcess) Stop() (int, error) {
+	err := p.cmd.Wait()
 
 	var exitErr *exec.ExitError
 	if errors.As(err, &exitErr) {

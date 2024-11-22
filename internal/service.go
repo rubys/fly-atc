@@ -25,9 +25,15 @@ func (s *Service) Run() int {
 
 	s.setEnvironment()
 
-	exitCode, err := upstream.Run()
+	err := upstream.Start()
 	if err != nil {
 		slog.Error("Failed to start wrapped process", "command", s.config.UpstreamCommand, "args", s.config.UpstreamArgs, "error", err)
+		return 1
+	}
+
+	exitCode, err := upstream.Stop()
+	if err != nil {
+		slog.Error("Failed to stop wrapped process", "command", s.config.UpstreamCommand, "args", s.config.UpstreamArgs, "error", err)
 		return 1
 	}
 

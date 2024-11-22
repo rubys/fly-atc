@@ -7,31 +7,27 @@ import (
 )
 
 type Service struct {
-	config *Config
+	config   *Config
+	upstream *UpstreamProcess
 }
 
 func NewService(config *Config) *Service {
 	return &Service{
-		config: config,
+		config:   config,
+		upstream: nil,
 	}
 }
 
-func (s *Service) Run() int {
-	server := NewServer(s.config)
-	upstream := NewUpstreamProcess(s.config.UpstreamCommand, s.config.UpstreamArgs...)
-
-	server.Start()
-	defer server.Stop()
+func (s *Service) Start() error {
+	s.upstream = NewUpstreamProcess(s.config.UpstreamCommand, s.config.UpstreamArgs...)
 
 	s.setEnvironment()
 
-	err := upstream.Start()
-	if err != nil {
-		slog.Error("Failed to start wrapped process", "command", s.config.UpstreamCommand, "args", s.config.UpstreamArgs, "error", err)
-		return 1
-	}
+	return s.upstream.Start()
+}
 
-	exitCode, err := upstream.Stop()
+func (s *Service) Stop() int {
+	exitCode, err := s.upstream.Stop()
 	if err != nil {
 		slog.Error("Failed to stop wrapped process", "command", s.config.UpstreamCommand, "args", s.config.UpstreamArgs, "error", err)
 		return 1

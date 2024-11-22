@@ -26,5 +26,6 @@ func main() {
 	defer server.Stop()
 
 	service := internal.NewService(config)
-	os.Exit(service.Run())
+	service.Start()
+	os.Exit(service.Stop())
 }

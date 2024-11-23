@@ -11,6 +11,7 @@ import (
 type HandlerOptions struct {
 	badGatewayPage           string
 	cache                    Cache
+	config                   *Config
 	maxCacheableResponseBody int
 	maxRequestBody           int
 	targetUrl                *url.URL
@@ -29,6 +30,8 @@ func NewHandler(options HandlerOptions) http.Handler {
 	}
 
 	handler = NewLoggingMiddleware(slog.Default(), handler)
+
+	handler = NewMonitor(options.config, handler)
 
 	return handler
 }

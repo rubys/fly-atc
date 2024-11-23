@@ -2,6 +2,7 @@ package internal
 
 import (
 	"errors"
+	"fmt"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -15,10 +16,17 @@ type UpstreamProcess struct {
 }
 
 func NewUpstreamProcess(name string, arg ...string) *UpstreamProcess {
+	cmd := exec.Command(name, arg...)
+	cmd.Env = os.Environ()
+
 	return &UpstreamProcess{
 		Started: make(chan struct{}, 1),
-		cmd:     exec.Command(name, arg...),
+		cmd:     cmd,
 	}
+}
+
+func (p *UpstreamProcess) setEnvironment(name string, value string) {
+	p.cmd.Env = append(p.cmd.Env, fmt.Sprintf("%s=%s", name, value))
 }
 
 func (p *UpstreamProcess) Start() error {

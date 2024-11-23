@@ -3,7 +3,8 @@ package internal
 import (
 	"fmt"
 	"log/slog"
-	"os"
+	"net/http"
+	"time"
 )
 
 type Service struct {
@@ -21,9 +22,41 @@ func NewService(config *Config) *Service {
 func (s *Service) Start() error {
 	s.upstream = NewUpstreamProcess(s.config.UpstreamCommand, s.config.UpstreamArgs...)
 
-	s.setEnvironment()
+	s.upstream.setEnvironment("PORT", fmt.Sprintf("%d", s.config.TargetPort))
 
-	return s.upstream.Start()
+	err := s.upstream.Start()
+	if err != nil {
+		slog.Error("Failed to start wrapped process", "command", s.config.UpstreamCommand, "args", s.config.UpstreamArgs, "error", err)
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) HealthCheck(endpoint string) error {
+	alive := make(chan error)
+
+	go func() {
+		for i := 0; i < 240; i++ {
+			time.Sleep(250 * time.Millisecond)
+			response, err := http.Get(fmt.Sprintf("http://localhost:%d", s.config.TargetPort))
+			if err == nil && response != nil && response.StatusCode == 200 {
+				alive <- nil
+				return
+			}
+		}
+
+		response, err := http.Get(fmt.Sprintf("http://localhost:%d", s.config.TargetPort))
+		if err != nil {
+			alive <- err
+		}
+
+		if response.StatusCode != 200 {
+			alive <- fmt.Errorf("unexpected status code: %d", response.StatusCode)
+		}
+	}()
+
+	return <-alive
 }
 
 func (s *Service) Stop() int {
@@ -34,9 +67,4 @@ func (s *Service) Stop() int {
 	}
 
 	return exitCode
-}
-
-func (s *Service) setEnvironment() {
-	// Set PORT to be inherited by the upstream process.
-	os.Setenv("PORT", fmt.Sprintf("%d", s.config.TargetPort))
 }

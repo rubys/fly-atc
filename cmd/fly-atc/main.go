@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/rubys/fly-atc/internal"
 )
@@ -25,7 +27,10 @@ func main() {
 	server.Start()
 	defer server.Stop()
 
-	service := internal.NewService(config)
-	service.Start()
-	os.Exit(service.Stop())
+	done := make(chan os.Signal, 1)
+	signal.Notify(done, syscall.SIGINT, syscall.SIGTERM)
+	<-done
+
+	fmt.Printf("Shutting down...\n")
+	os.Exit(internal.Shutdown())
 }

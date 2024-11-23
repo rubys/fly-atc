@@ -23,6 +23,7 @@ func NewServer(config *Config) *Server {
 	handlerOptions := HandlerOptions{
 		cache:                    server.cache(),
 		targetUrl:                server.targetUrl(),
+		config:                   config,
 		xSendfileEnabled:         config.XSendfileEnabled,
 		maxCacheableResponseBody: config.MaxCacheItemSizeBytes,
 		maxRequestBody:           config.MaxRequestBody,

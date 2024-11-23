@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	configFile = "config/atc.yaml"
+	configFile = "config/atc.yml"
 
 	KB = 1024
 	MB = 1024 * KB
@@ -55,11 +55,27 @@ type Config struct {
 	LogLevel slog.Level `yaml:"log_level"`
 }
 
-func NewConfig() (*Config, error) {
-	if len(os.Args) < 2 {
-		return nil, errors.New("missing upstream command")
-	}
+type Route struct {
+	Name     string `yaml:"name"`
+	Endpoint string `yaml:"endpoint"`
 
+	Database string `yaml:"database"`
+	Region   string `yaml:"region"`
+	Instance string `yaml:"instance"`
+}
+
+type Settings struct {
+	Server *Config `yaml:"server"`
+	Routes []Route `yaml:"routes"`
+}
+
+var settings Settings
+
+func Routes() []Route {
+	return settings.Routes
+}
+
+func NewConfig() (*Config, error) {
 	config := &Config{
 		TargetPort: defaultTargetPort,
 
@@ -78,9 +94,11 @@ func NewConfig() (*Config, error) {
 		LogLevel: defaultLogLevel,
 	}
 
+	settings.Server = config
+
 	data, err := os.ReadFile(configFile)
-	if err != nil {
-		err = yaml.Unmarshal(data, &config)
+	if err == nil {
+		err = yaml.Unmarshal(data, &settings)
 		if err != nil {
 			return nil, err
 		}

@@ -15,7 +15,7 @@ const (
 
 	ENV_PREFIX = "THRUSTER_"
 
-	defaultTargetPort = 3000
+	defaultTargetPort = 0
 
 	defaultCacheSize             = 64 * MB
 	defaultMaxCacheItemSizeBytes = 1 * MB
@@ -23,7 +23,7 @@ const (
 
 	defaultBadGatewayPage = "./public/502.html"
 
-	defaultHttpPort         = 80
+	defaultHttpPort         = 3000
 	defaultHttpIdleTimeout  = 60 * time.Second
 	defaultHttpReadTimeout  = 30 * time.Second
 	defaultHttpWriteTimeout = 30 * time.Second

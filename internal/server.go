@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"net/url"
 	"time"
 )
 
@@ -22,7 +21,6 @@ func NewServer(config *Config) *Server {
 
 	handlerOptions := HandlerOptions{
 		cache:                    server.cache(),
-		targetUrl:                server.targetUrl(),
 		config:                   config,
 		xSendfileEnabled:         config.XSendfileEnabled,
 		maxCacheableResponseBody: config.MaxCacheItemSizeBytes,
@@ -69,9 +67,4 @@ func (s *Server) defaultHttpServer(addr string) *http.Server {
 
 func (s *Server) cache() Cache {
 	return NewMemoryCache(s.config.CacheSizeBytes, s.config.MaxCacheItemSizeBytes)
-}
-
-func (s *Server) targetUrl() *url.URL {
-	url, _ := url.Parse(fmt.Sprintf("http://localhost:%d", s.config.TargetPort))
-	return url
 }

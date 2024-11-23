@@ -23,6 +23,7 @@ func (s *Service) Start() error {
 	s.upstream = NewUpstreamProcess(s.config.UpstreamCommand, s.config.UpstreamArgs...)
 
 	s.upstream.setEnvironment("PORT", fmt.Sprintf("%d", s.config.TargetPort))
+	fmt.Printf("PORT: %d\n", s.config.TargetPort)
 
 	err := s.upstream.Start()
 	if err != nil {
@@ -37,22 +38,28 @@ func (s *Service) HealthCheck(endpoint string) error {
 	alive := make(chan error)
 
 	go func() {
-		for i := 0; i < 240; i++ {
+		stop := time.Now().Add(s.config.HttpIdleTimeout)
+
+		for {
 			time.Sleep(250 * time.Millisecond)
-			response, err := http.Get(fmt.Sprintf("http://localhost:%d", s.config.TargetPort))
+
+			response, err := http.Get(endpoint)
 			if err == nil && response != nil && response.StatusCode == 200 {
 				alive <- nil
 				return
 			}
-		}
 
-		response, err := http.Get(fmt.Sprintf("http://localhost:%d", s.config.TargetPort))
-		if err != nil {
-			alive <- err
-		}
+			if time.Now().After(stop) {
+				if err != nil {
+					alive <- err
+				} else if response == nil {
+					alive <- fmt.Errorf("no response")
+				} else {
+					alive <- fmt.Errorf("unexpected status code: %d", response.StatusCode)
+				}
 
-		if response.StatusCode != 200 {
-			alive <- fmt.Errorf("unexpected status code: %d", response.StatusCode)
+				break
+			}
 		}
 	}()
 

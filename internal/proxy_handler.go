@@ -5,14 +5,13 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httputil"
-	"net/url"
 	"os"
 )
 
-func NewProxyHandler(targetUrl *url.URL, badGatewayPage string, forwardHeaders bool) http.Handler {
+func NewProxyHandler(badGatewayPage string, forwardHeaders bool) http.Handler {
 	return &httputil.ReverseProxy{
 		Rewrite: func(r *httputil.ProxyRequest) {
-			r.SetURL(targetUrl)
+			r.SetURL(TargetForMonitor("default"))
 			r.Out.Host = r.In.Host
 			setXForwarded(r, forwardHeaders)
 		},

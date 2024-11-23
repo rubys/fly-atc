@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"strconv"
 	"testing"
 
@@ -241,12 +240,9 @@ func TestHandlerXForwardedHeadersDropsExistingHeadersWhenForwardingNotEnabled(t 
 
 // Helpers
 
-func handlerOptions(targetUrl string) HandlerOptions {
-	url, _ := url.Parse(targetUrl)
-
+func handlerOptions(_ string) HandlerOptions {
 	return HandlerOptions{
 		cache:                    NewMemoryCache(defaultCacheSize, defaultMaxCacheItemSizeBytes),
-		targetUrl:                url,
 		xSendfileEnabled:         true,
 		maxCacheableResponseBody: 1024,
 		badGatewayPage:           "",

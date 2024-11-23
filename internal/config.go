@@ -7,9 +7,13 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"gopkg.in/yaml.v3"
 )
 
 const (
+	configFile = "config/atc.yaml"
+
 	KB = 1024
 	MB = 1024 * KB
 
@@ -32,23 +36,23 @@ const (
 )
 
 type Config struct {
-	TargetPort      int
-	UpstreamCommand string
-	UpstreamArgs    []string
+	TargetPort      int      `yaml:"target_port"`
+	UpstreamCommand string   `yaml:"upstream_command"`
+	UpstreamArgs    []string `yaml:"upstream_args"`
 
-	CacheSizeBytes        int
-	MaxCacheItemSizeBytes int
-	XSendfileEnabled      bool
-	MaxRequestBody        int
+	CacheSizeBytes        int  `yaml:"cache_size_bytes"`
+	MaxCacheItemSizeBytes int  `yaml:"max_cache_item_size_bytes"`
+	XSendfileEnabled      bool `yaml:"x_sendfile_enabled"`
+	MaxRequestBody        int  `yaml:"max_request_body"`
 
-	BadGatewayPage string
+	BadGatewayPage string `yaml:"bad_gateway_page"`
 
-	HttpPort         int
-	HttpIdleTimeout  time.Duration
-	HttpReadTimeout  time.Duration
-	HttpWriteTimeout time.Duration
+	HttpPort         int           `yaml:"http_port"`
+	HttpIdleTimeout  time.Duration `yaml:"http_idle_timeout"`
+	HttpReadTimeout  time.Duration `yaml:"http_read_timeout"`
+	HttpWriteTimeout time.Duration `yaml:"http_write_timeout"`
 
-	LogLevel slog.Level
+	LogLevel slog.Level `yaml:"log_level"`
 }
 
 func NewConfig() (*Config, error) {
@@ -56,29 +60,52 @@ func NewConfig() (*Config, error) {
 		return nil, errors.New("missing upstream command")
 	}
 
-	logLevel := defaultLogLevel
-	if getEnvBool("DEBUG", false) {
-		logLevel = slog.LevelDebug
+	config := &Config{
+		TargetPort: defaultTargetPort,
+
+		CacheSizeBytes:        defaultCacheSize,
+		MaxCacheItemSizeBytes: defaultMaxCacheItemSizeBytes,
+		XSendfileEnabled:      true,
+		MaxRequestBody:        defaultMaxRequestBody,
+
+		BadGatewayPage: defaultBadGatewayPage,
+
+		HttpPort:         defaultHttpPort,
+		HttpIdleTimeout:  defaultHttpIdleTimeout,
+		HttpReadTimeout:  defaultHttpReadTimeout,
+		HttpWriteTimeout: defaultHttpWriteTimeout,
+
+		LogLevel: defaultLogLevel,
 	}
 
-	config := &Config{
-		TargetPort:      getEnvInt("TARGET_PORT", defaultTargetPort),
-		UpstreamCommand: os.Args[1],
-		UpstreamArgs:    os.Args[2:],
+	data, err := os.ReadFile(configFile)
+	if err != nil {
+		err = yaml.Unmarshal(data, &config)
+		if err != nil {
+			return nil, err
+		}
+	}
 
-		CacheSizeBytes:        getEnvInt("CACHE_SIZE", defaultCacheSize),
-		MaxCacheItemSizeBytes: getEnvInt("MAX_CACHE_ITEM_SIZE", defaultMaxCacheItemSizeBytes),
-		XSendfileEnabled:      getEnvBool("X_SENDFILE_ENABLED", true),
-		MaxRequestBody:        getEnvInt("MAX_REQUEST_BODY", defaultMaxRequestBody),
+	config.TargetPort = getEnvInt("TARGET_PORT", config.TargetPort)
+	config.CacheSizeBytes = getEnvInt("CACHE_SIZE", config.CacheSizeBytes)
+	config.MaxCacheItemSizeBytes = getEnvInt("MAX_CACHE_ITEM_SIZE", config.MaxCacheItemSizeBytes)
+	config.XSendfileEnabled = getEnvBool("X_SENDFILE_ENABLED", config.XSendfileEnabled)
+	config.MaxRequestBody = getEnvInt("MAX_REQUEST_BODY", config.MaxRequestBody)
+	config.BadGatewayPage = getEnvString("BAD_GATEWAY_PAGE", config.BadGatewayPage)
+	config.HttpPort = getEnvInt("HTTP_PORT", config.HttpPort)
+	config.HttpIdleTimeout = getEnvDuration("HTTP_IDLE_TIMEOUT", config.HttpIdleTimeout)
+	config.HttpReadTimeout = getEnvDuration("HTTP_READ_TIMEOUT", config.HttpReadTimeout)
+	config.HttpWriteTimeout = getEnvDuration("HTTP_WRITE_TIMEOUT", config.HttpWriteTimeout)
 
-		BadGatewayPage: getEnvString("BAD_GATEWAY_PAGE", defaultBadGatewayPage),
+	if getEnvBool("DEBUG", false) {
+		config.LogLevel = slog.LevelDebug
+	}
 
-		HttpPort:         getEnvInt("HTTP_PORT", defaultHttpPort),
-		HttpIdleTimeout:  getEnvDuration("HTTP_IDLE_TIMEOUT", defaultHttpIdleTimeout),
-		HttpReadTimeout:  getEnvDuration("HTTP_READ_TIMEOUT", defaultHttpReadTimeout),
-		HttpWriteTimeout: getEnvDuration("HTTP_WRITE_TIMEOUT", defaultHttpWriteTimeout),
-
-		LogLevel: logLevel,
+	if len(os.Args) >= 2 {
+		config.UpstreamCommand = os.Args[1]
+		config.UpstreamArgs = os.Args[2:]
+	} else if config.UpstreamCommand == "" {
+		return nil, errors.New("missing upstream command")
 	}
 
 	return config, nil

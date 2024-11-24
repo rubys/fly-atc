@@ -29,7 +29,7 @@ func NewHandler(options HandlerOptions) http.Handler {
 
 	handler = NewLoggingMiddleware(slog.Default(), handler)
 
-	handler = NewMonitor("default", options.config, handler)
+	handler = NewMonitor("__default__", options.config, handler)
 
 	return handler
 }

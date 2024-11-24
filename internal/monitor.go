@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"net/http"
@@ -9,17 +10,22 @@ import (
 )
 
 var mutex sync.RWMutex
+var registry []*Monitor
 
 func NewMonitor(name string, config *Config, next http.Handler) *Monitor {
 	monitor := &Monitor{config: config, next: next}
 
-	mutex.Lock()
-	new_registry := make(map[string]*Monitor)
-	for k, v := range registry {
-		new_registry[k] = v
+	if config.TargetPort == 0 {
+		config.TargetPort = monitor.availablePort()
 	}
-	new_registry[name] = monitor
-	registry = new_registry
+
+	targetURL, err := url.Parse(fmt.Sprintf("http://localhost:%d", config.TargetPort))
+	if err == nil {
+		monitor.target = targetURL
+	}
+
+	mutex.Lock()
+	registry = append(registry, monitor)
 	mutex.Unlock()
 
 	return monitor
@@ -34,41 +40,25 @@ type Monitor struct {
 	started bool
 }
 
-var registry = make(map[string]*Monitor)
-
 func (m *Monitor) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	m.Lock()
-
-	if m.config.TargetPort == 0 {
-		m.config.TargetPort = m.availablePort()
-	}
-
-	targetURL, err := url.Parse(fmt.Sprintf("http://localhost:%d", m.config.TargetPort))
-	if err != nil {
-		m.Unlock()
-		http.Error(w, "Invalid target URL", http.StatusInternalServerError)
-		return
-	}
-	m.target = targetURL
-
 	if m.service == nil {
-		m.service = NewService(m.config)
-		m.service.Start()
-		m.Unlock()
-		m.service.HealthCheck(m.target.String())
-	} else {
+		m.Lock()
+
+		if m.service == nil {
+			service := NewService(m.config)
+			service.Start()
+			service.HealthCheck(m.target.String())
+			m.service = service
+		}
+
 		m.Unlock()
 	}
 
-	m.next.ServeHTTP(w, r)
-}
+	ctx := r.Context()
+	ctx = context.WithValue(ctx, "target_url", m.target)
+	newReq := r.WithContext(ctx)
 
-func TargetForMonitor(name string) *url.URL {
-	if monitor, ok := registry[name]; ok {
-		return monitor.target
-	}
-
-	return nil
+	m.next.ServeHTTP(w, newReq)
 }
 
 func Shutdown() int {

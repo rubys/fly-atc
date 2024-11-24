@@ -62,6 +62,8 @@ type Route struct {
 	Database string `yaml:"database"`
 	Region   string `yaml:"region"`
 	Instance string `yaml:"instance"`
+
+	Monitor *Monitor
 }
 
 type Settings struct {

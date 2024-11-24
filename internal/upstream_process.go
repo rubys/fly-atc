@@ -27,7 +27,6 @@ func NewUpstreamProcess(name string, arg ...string) *UpstreamProcess {
 
 func (p *UpstreamProcess) setEnvironment(name string, value string) {
 	p.cmd.Env = append(p.cmd.Env, fmt.Sprintf("%s=%s", name, value))
-	fmt.Printf("%s=%s\n", name, value)
 }
 
 func (p *UpstreamProcess) Start() error {

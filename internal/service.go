@@ -23,7 +23,6 @@ func (s *Service) Start() error {
 	s.upstream = NewUpstreamProcess(s.config.UpstreamCommand, s.config.UpstreamArgs...)
 
 	s.upstream.setEnvironment("PORT", fmt.Sprintf("%d", s.config.TargetPort))
-	fmt.Printf("PORT: %d\n", s.config.TargetPort)
 
 	err := s.upstream.Start()
 	if err != nil {

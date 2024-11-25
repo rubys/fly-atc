@@ -1,0 +1,14 @@
+# This is the configuration file for litestream.
+#
+# For more details, see: https://litestream.io/reference/config/
+#
+dbs:
+<% for db in @dbs -%>
+  - path: <%= db %>
+    replicas:
+      - type: s3
+        bucket: $BUCKET_NAME
+        path: <%= db %>
+        access-key-id: $AWS_ACCESS_KEY_ID
+        secret-access-key: $AWS_SECRET_ACCESS_KEY
+<% end -%>

@@ -9,34 +9,38 @@ import (
 	"sync"
 )
 
-var mutex sync.RWMutex
+var monitor_mutex sync.RWMutex
 var registry []*Monitor
 
-func NewMonitor(name string, config *Config, next http.Handler) *Monitor {
-	monitor := &Monitor{config: config, next: next}
+func NewMonitor(route *Route, config *Config, next http.Handler) *Monitor {
+	monitor := &Monitor{route: route, config: config, next: next}
 
 	if config.TargetPort == 0 {
-		config.TargetPort = monitor.availablePort()
+		monitor.port = availablePort()
+	} else {
+		monitor.port = config.TargetPort
 	}
 
-	targetURL, err := url.Parse(fmt.Sprintf("http://localhost:%d", config.TargetPort))
+	targetURL, err := url.Parse(fmt.Sprintf("http://localhost:%d", monitor.port))
 	if err == nil {
 		monitor.target = targetURL
 	}
 
-	mutex.Lock()
+	monitor_mutex.Lock()
 	registry = append(registry, monitor)
-	mutex.Unlock()
+	monitor_mutex.Unlock()
 
 	return monitor
 }
 
 type Monitor struct {
 	sync.RWMutex
+	route   *Route
 	config  *Config
 	next    http.Handler
 	service *Service
 	target  *url.URL
+	port    int
 	started bool
 }
 
@@ -46,7 +50,7 @@ func (m *Monitor) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		if m.service == nil {
 			service := NewService(m.config)
-			service.Start()
+			service.Start(m.route)
 			service.HealthCheck(m.target.String())
 			m.service = service
 		}
@@ -62,8 +66,8 @@ func (m *Monitor) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func Shutdown() int {
-	mutex.Lock()
-	defer mutex.Unlock()
+	monitor_mutex.Lock()
+	defer monitor_mutex.Unlock()
 
 	for _, monitor := range registry {
 		monitor.Lock()
@@ -78,7 +82,7 @@ func Shutdown() int {
 
 // private
 
-func (m *Monitor) availablePort() int {
+func availablePort() int {
 	listener, err := net.Listen("tcp", ":0")
 	if err != nil {
 		return 0

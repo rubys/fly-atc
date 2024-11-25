@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -19,10 +21,29 @@ func NewService(config *Config) *Service {
 	}
 }
 
-func (s *Service) Start() error {
+func (s *Service) Start(route *Route) error {
 	s.upstream = NewUpstreamProcess(s.config.UpstreamCommand, s.config.UpstreamArgs...)
 
-	s.upstream.setEnvironment("PORT", fmt.Sprintf("%d", s.config.TargetPort))
+	s.upstream.setEnvironment("PORT", fmt.Sprintf("%d", route.Monitor.port))
+	s.upstream.setEnvironment("FLY_ATC_SCOPE", route.Endpoint)
+	s.upstream.setEnvironment("PIDFILE", fmt.Sprintf("tmp/pids/%s.pid", route.Name))
+
+	if route.Database != "" {
+		database_url := os.Getenv("DATABASE_URL")
+
+		if database_url == "" {
+			database_url = "sqlite3:./storage/production.sqlite3"
+		}
+
+		if route.Database != "" {
+			dir := filepath.Dir(database_url)
+			database_url = filepath.Join(dir, fmt.Sprintf("%s.sqlite3", route.Database))
+		}
+
+		fmt.Printf("Setting DATABASE_URL=%s\n", database_url)
+
+		s.upstream.setEnvironment("DATABASE_URL", database_url)
+	}
 
 	err := s.upstream.Start()
 	if err != nil {

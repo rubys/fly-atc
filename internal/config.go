@@ -128,6 +128,13 @@ func NewConfig() (*Config, error) {
 		return nil, errors.New("missing upstream command")
 	}
 
+	if len(settings.Routes) == 0 {
+		settings.Routes = append(settings.Routes, Route{
+			Name:     "",
+			Endpoint: "",
+		})
+	}
+
 	return config, nil
 }
 

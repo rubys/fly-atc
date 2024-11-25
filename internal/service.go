@@ -40,8 +40,6 @@ func (s *Service) Start(route *Route) error {
 			database_url = filepath.Join(dir, fmt.Sprintf("%s.sqlite3", route.Database))
 		}
 
-		fmt.Printf("Setting DATABASE_URL=%s\n", database_url)
-
 		s.upstream.setEnvironment("DATABASE_URL", database_url)
 	}
 

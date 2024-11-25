@@ -2,7 +2,6 @@ package internal
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strings"
 	"sync"
@@ -29,9 +28,7 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				router_mutex.Lock()
 
 				if route.Monitor == nil {
-					fmt.Printf("Creating monitor for route \"%s\" (%d)\n", route.Endpoint, i)
 					route.Monitor = NewMonitor(route, router.config, router.next)
-					fmt.Printf("%v\n", route.Monitor)
 				}
 
 				router_mutex.Unlock()

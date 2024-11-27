@@ -6,15 +6,23 @@ A SaaS toolkit for converting a personal application into a efficient, siloed, m
 
 ## Usage
 
-This is all TBD at this point, but for Rails projects it is likely to go something like this:
+### Quickstart (single tenant):
 
-* Replace thruster with fly-atc in Gemfile and Dockerfile
-* Define your tenants in a config file, probably YAML.
+```
+bundle add fly-atc
+bundle binstubs fly-atc
+```
 
-For non-Rails projects, the process is likely going to be similar:
+Replace `thruster` with `fly-atc` in Dockerfile.
 
-* Follow the instructions for using thruster with your framework, but substitute fly-atc for thruster.
-* Define your tenants in a config file, probably YAML but JSON could also be supported.
+### Quickstart (multi-tenant):
+
+```
+bundle add fly-atc
+bin/rails generate atc
+```
+
+Edit `config/atc.yml` as needed.
 
 Fly.io's dockerfile generators will be able to help with this.
 

@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -59,7 +60,8 @@ func (s *Service) Start(route *Route) error {
 	if os.Getenv("BUCKET_NAME") == "" {
 		s.upstream = NewUpstreamProcess(s.config.UpstreamCommand, s.config.UpstreamArgs...)
 	} else {
-		cmd := []string{"exec", s.config.UpstreamCommand, "-config", litestream_config, "-exec"}
+		subcmd := strings.Join(s.config.UpstreamArgs, " ")
+		cmd := []string{"exec", "litestream", "replicate", "-config", litestream_config, "-exec", s.config.UpstreamCommand}
 		s.upstream = NewUpstreamProcess("bundle", append(cmd, s.config.UpstreamArgs...)...)
 	}
 

@@ -6,3 +6,6 @@
 /pkg
 /exe/
 !/exe/thrust
+
+# As it says, notes that are private
+/private-notes

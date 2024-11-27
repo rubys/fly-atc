@@ -56,7 +56,12 @@ func (s *Service) Start(route *Route) error {
 		return err
 	}
 
-	s.upstream = NewUpstreamProcess(s.config.UpstreamCommand, s.config.UpstreamArgs...)
+	if os.Getenv("BUCKET_NAME") == "" {
+		s.upstream = NewUpstreamProcess(s.config.UpstreamCommand, s.config.UpstreamArgs...)
+	} else {
+		cmd := []string{"exec", s.config.UpstreamCommand, "-config", litestream_config, "-exec"}
+		s.upstream = NewUpstreamProcess("bundle", append(cmd, s.config.UpstreamArgs...)...)
+	}
 
 	s.upstream.setEnvironment("PORT", fmt.Sprintf("%d", route.Monitor.port))
 	s.upstream.setEnvironment("FLY_ATC_SCOPE", route.Endpoint)

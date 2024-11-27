@@ -14,6 +14,9 @@ Gem::Specification.new do |s|
     "homepage_uri" => s.homepage
   }
 
+  spec.add_dependency "rails", ">= 7.0.0"
+  spec.add_dependency "litestream", ">= 0.10"
+
   s.files = Dir[ "{lib}/**/*", "MIT-LICENSE", "README.md" ]
   s.bindir = "exe"
   s.executables << "fly-atc"

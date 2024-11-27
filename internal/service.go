@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"time"
 )
@@ -22,28 +23,47 @@ func NewService(config *Config) *Service {
 }
 
 func (s *Service) Start(route *Route) error {
+	database_url := os.Getenv("DATABASE_URL")
+
+	if database_url == "" {
+		environment := os.Getenv("RAILS_ENV")
+
+		if environment == "" {
+			environment = "development"
+		}
+
+		database_url = fmt.Sprintf("sqlite3:./storage/%s.sqlite3", environment)
+	}
+
+	if route.Database != "" {
+		dir := filepath.Dir(database_url)
+		database_url = filepath.Join(dir, fmt.Sprintf("%s.sqlite3", route.Database))
+	}
+
+	litestream_config := fmt.Sprintf("tmp/litestream_%s.yml", route.Name)
+
+	cmd := exec.Command("bin/rails", "atc:prepare")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Env = append(os.Environ(),
+		fmt.Sprintf("LITESTREAM_CONFIG=%s", litestream_config),
+		fmt.Sprintf("DATABASE_URL=%s", database_url),
+	)
+	err := cmd.Run()
+	if err != nil {
+		slog.Error("Failed to prepare atc environment", "error", err)
+		return err
+	}
+
 	s.upstream = NewUpstreamProcess(s.config.UpstreamCommand, s.config.UpstreamArgs...)
 
 	s.upstream.setEnvironment("PORT", fmt.Sprintf("%d", route.Monitor.port))
 	s.upstream.setEnvironment("FLY_ATC_SCOPE", route.Endpoint)
+	s.upstream.setEnvironment("LITESTREAM_CONFIG", litestream_config)
 	s.upstream.setEnvironment("PIDFILE", fmt.Sprintf("tmp/pids/%s.pid", route.Name))
+	s.upstream.setEnvironment("DATABASE_URL", database_url)
 
-	if route.Database != "" {
-		database_url := os.Getenv("DATABASE_URL")
-
-		if database_url == "" {
-			database_url = "sqlite3:./storage/production.sqlite3"
-		}
-
-		if route.Database != "" {
-			dir := filepath.Dir(database_url)
-			database_url = filepath.Join(dir, fmt.Sprintf("%s.sqlite3", route.Database))
-		}
-
-		s.upstream.setEnvironment("DATABASE_URL", database_url)
-	}
-
-	err := s.upstream.Start()
+	err = s.upstream.Start()
 	if err != nil {
 		slog.Error("Failed to start wrapped process", "command", s.config.UpstreamCommand, "args", s.config.UpstreamArgs, "error", err)
 		return err

@@ -41,7 +41,6 @@ type Monitor struct {
 	service *Service
 	target  *url.URL
 	port    int
-	started bool
 }
 
 func (m *Monitor) ServeHTTP(w http.ResponseWriter, r *http.Request) {

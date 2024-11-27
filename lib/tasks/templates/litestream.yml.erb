@@ -8,7 +8,7 @@ dbs:
     replicas:
       - type: s3
         bucket: $BUCKET_NAME
-        path: <%= db %>
+        path: storage/<%= File.basename(db) %>
         access-key-id: $AWS_ACCESS_KEY_ID
         secret-access-key: $AWS_SECRET_ACCESS_KEY
 <% end -%>

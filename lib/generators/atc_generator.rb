@@ -12,20 +12,20 @@ class AtcGenerator < Rails::Generators::Base
       routes = routes.split(/\n\s*\n/)
       scoped = routes.select {|route| route =~ /^\s*\w/ && !route.include?('as:')}
 
-      #routes = <<~EOF
-	#{prolog.rstrip}
-	  fly_atc_scope = ENV.fetch("FLY_ATC_SCOPE", "")
+      @routes = <<~EOF
+        #{prolog.rstrip}
+          fly_atc_scope = ENV.fetch("FLY_ATC_SCOPE", "")
 
-	  unless fly_atc_scope == ""
-	    mount ActionCable.server => "/\#{fly_atc_scope}/cable"
-	  end
+          unless fly_atc_scope == ""
+            mount ActionCable.server => "/\#{fly_atc_scope}/cable"
+          end
 
-	  scope fly_atc_scope do
-	#{scoped.join("\n\n").gsub(/^ /, "   ")}
-	  end
+          scope fly_atc_scope do
+        #{scoped.join("\n\n").gsub(/^ /, "   ")}
+          end
 
-	#{(routes-scoped).join("\n\n").rstrip}
-	#{epilog.rstrip}
+        #{(routes-scoped).join("\n\n").rstrip}
+        #{epilog.rstrip}
       EOF
     end
 
@@ -40,19 +40,5 @@ class AtcGenerator < Rails::Generators::Base
     end
 
     template "application.html.erb", "app/views/layouts/application.html.erb"
-
-    ### config/litestream.yml
-
-    unless File.exist? "config/litestream.yml"
-      @dbs =
-        ActiveRecord::Base
-          .configurations
-          .configs_for(env_name: "production", include_hidden: true)
-          .select { |config| ["sqlite3", "litedb"].include? config.adapter }
-          .map(&:database)
-          .map { |db| db.sub("/production", "/${DBNAME}") }
-
-      template "litestream.yml.erb", "config/litestream.yml"
-    end
   end
 end

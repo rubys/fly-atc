@@ -7,6 +7,7 @@ dbs:
   - path: <%= db %>
     replicas:
       - type: s3
+        endpoint: $AWS_ENDPOINT_URL_S3
         bucket: $BUCKET_NAME
         path: storage/<%= File.basename(db) %>
         access-key-id: $AWS_ACCESS_KEY_ID

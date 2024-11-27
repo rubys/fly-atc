@@ -60,9 +60,9 @@ func (s *Service) Start(route *Route) error {
 	if os.Getenv("BUCKET_NAME") == "" {
 		s.upstream = NewUpstreamProcess(s.config.UpstreamCommand, s.config.UpstreamArgs...)
 	} else {
-		subcmd := strings.Join(s.config.UpstreamArgs, " ")
-		cmd := []string{"exec", "litestream", "replicate", "-config", litestream_config, "-exec", s.config.UpstreamCommand}
-		s.upstream = NewUpstreamProcess("bundle", append(cmd, s.config.UpstreamArgs...)...)
+		subcmd := s.config.UpstreamCommand + " " + strings.Join(s.config.UpstreamArgs, " ")
+		cmd := []string{"exec", "litestream", "replicate", "-config", litestream_config, "-exec", subcmd}
+		s.upstream = NewUpstreamProcess("bundle", cmd...)
 	}
 
 	s.upstream.setEnvironment("PORT", fmt.Sprintf("%d", route.Monitor.port))

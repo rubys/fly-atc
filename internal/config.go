@@ -33,6 +33,8 @@ const (
 	defaultHttpWriteTimeout = 30 * time.Second
 
 	defaultLogLevel = slog.LevelInfo
+
+	defaultHealthCheckPath = "/up"
 )
 
 type Config struct {
@@ -51,6 +53,8 @@ type Config struct {
 	HttpIdleTimeout  time.Duration `yaml:"http_idle_timeout"`
 	HttpReadTimeout  time.Duration `yaml:"http_read_timeout"`
 	HttpWriteTimeout time.Duration `yaml:"http_write_timeout"`
+
+	HealthCheckPath string `yaml:"health_check_path"`
 
 	LogLevel slog.Level `yaml:"log_level"`
 }
@@ -94,6 +98,8 @@ func NewConfig() (*Config, error) {
 		HttpWriteTimeout: defaultHttpWriteTimeout,
 
 		LogLevel: defaultLogLevel,
+
+		HealthCheckPath: defaultHealthCheckPath,
 	}
 
 	settings.Server = config

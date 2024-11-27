@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -77,11 +78,16 @@ func (s *Service) HealthCheck(endpoint string) error {
 
 	go func() {
 		stop := time.Now().Add(s.config.HttpIdleTimeout)
+		health_check, err := url.JoinPath(endpoint, s.config.HealthCheckPath)
+		if err != nil {
+			alive <- err
+			return
+		}
 
 		for {
 			time.Sleep(250 * time.Millisecond)
 
-			response, err := http.Get(endpoint)
+			response, err := http.Get(health_check)
 			if err == nil && response != nil && response.StatusCode == 200 {
 				alive <- nil
 				return

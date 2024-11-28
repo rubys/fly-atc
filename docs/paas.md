@@ -1,4 +1,10 @@
-Rails recently released [Rails 8.0: No PaaS Required](https://rubyonrails.org/2024/11/7/rails-8-no-paas-required).  Fly.io seeks to redefine PaaS.  Let's start by defining a few terms.
+Rails recently released [Rails 8.0: No PaaS Required](https://rubyonrails.org/2024/11/7/rails-8-no-paas-required).  Fly.io seeks to redefine PaaS.  Some questions to start with:
+
+* Would you rather pay $0.01/hour for a PaaS or €5/month for a VPS?
+* Would you rather watch a [half hour video](https://world.hey.com/dhh/kamal-2-thou-need-not-paas-c9e8bd53) to plan your first deployment, or would you rather [launch now](https://fly.io/rails)?
+* Do you want to auto provision Active Storage, Active Job, Backups and more, or do you want to manually configure them later?
+
+Now lets dive deeper.
 
 # IaaS: Infrastructure as a Service
 

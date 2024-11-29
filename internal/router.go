@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"os"
 	"strings"
 	"sync"
@@ -13,6 +15,8 @@ var router_mutex sync.RWMutex
 
 var Instance = os.Getenv("FLY_MACHINE_ID")
 var Region = os.Getenv("FLY_REGION")
+
+var proxy *httputil.ReverseProxy
 
 type Router struct {
 	next   http.Handler
@@ -64,7 +68,30 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // Note: this is a method of the Route struct, not Router
-func (route *Route) replay(w http.ResponseWriter, _ *http.Request, field string, value string) {
+func (route *Route) replay(w http.ResponseWriter, r *http.Request, field string, value string) {
+	if r.Method != "GET" && r.Method != "HEAD" {
+		if r.ContentLength < 0 || r.ContentLength > 1_000_000 {
+			if proxy == nil {
+				router_mutex.Lock()
+				if proxy == nil {
+					proxy = httputil.NewSingleHostReverseProxy(&url.URL{
+						Scheme: r.URL.Scheme,
+						Host:   r.URL.Host,
+					})
+				}
+				router_mutex.Unlock()
+			}
+
+			if field == "instance" {
+				r.Header.Set("Fly-Force-Instance-Id", value)
+			} else {
+				r.Header.Set("Fly-Prefer-Region", value)
+			}
+
+			proxy.ServeHTTP(w, r)
+		}
+	}
+
 	w.Header().Set("Fly-Replay", fmt.Sprintf("%s=%s", field, value))
 	w.WriteHeader(http.StatusTemporaryRedirect)
 }

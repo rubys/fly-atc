@@ -4,7 +4,6 @@ Short range projects (thought to be relatively easy, but not necessary for the f
 
 * Applications are currently launched on demand; there should be an option to launch immediately.
 * Applications should (possibly optionally) stop when idle.
-* Router handler should reverse proxy if the payload exceeds 1Mb (essentially any non-GET, non-HEAD request that either doesn't have a Content-length header, or has one that specified a content that is too large).  Reverse proxying to the same URL but with an added `fly-force-instance-id` or `fly-prefer-region` header should do the trick.
 * Modifying the Rails [flyctl scanner](https://github.com/superfly/flyctl/blob/master/scanner/rails.go) and/or [dockerfile generator](https://github.com/fly-apps/dockerfile-rails?tab=readme-ov-file#overview) to automatically configure litestream for sqlite3 based deployments.
 * Generator option to create a [stimulus controller](https://github.com/rubys/showcase/blob/main/app/javascript/controllers/region_controller.js) to insert 
 that <a href="https://github.com/rubys/showcase/blob/main/app/javascript/controllers/region_controller.js">listens</a> for

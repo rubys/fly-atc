@@ -67,7 +67,7 @@ func (s *Service) Start(route *Route) error {
 
 	s.upstream.setEnvironment("PORT", fmt.Sprintf("%d", route.Monitor.port))
 	s.upstream.setEnvironment("FLY_ATC_SCOPE", route.Endpoint)
-	s.upstream.setEnvironment("FLY_ATC_NAME", route.Endpoint)
+	s.upstream.setEnvironment("FLY_ATC_NAME", route.Name)
 	s.upstream.setEnvironment("LITESTREAM_CONFIG", litestream_config)
 	s.upstream.setEnvironment("PIDFILE", fmt.Sprintf("tmp/pids/%s.pid", route.Name))
 	s.upstream.setEnvironment("DATABASE_URL", database_url)

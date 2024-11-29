@@ -7,8 +7,8 @@ class AtcGenerator < Rails::Generators::Base
     @routes = IO.read("config/routes.rb")
 
     unless @routes.include? "fly_atc_scope"
-      _, prolog, routes = routes.split(/(.*Rails.application.routes.draw do\n)/m,2)
-      routes, epilog, _ = @routes.split(/^(end.*)/m,2)
+      _, prolog, routes = @routes.split(/(.*Rails.application.routes.draw do\n)/m,2)
+      routes, epilog, _ = routes.split(/^(end.*)/m,2)
       routes = routes.split(/\n\s*\n/)
       scoped = routes.select {|route| route =~ /^\s*\w/ && !route.include?('as:')}
 
@@ -40,5 +40,15 @@ class AtcGenerator < Rails::Generators::Base
     end
 
     template "application.html.erb", "app/views/layouts/application.html.erb"
+
+    ### bin/fly-atc
+
+    unless File.exist?("bin/fly-atc")
+      system "bundle binstubs fly-atc"
+    end
+
+    ### Dockerfile
+
+    gsub_file "Dockerfile", "bin/thrust", "bin/fly-atc"
   end
 end

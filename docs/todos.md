@@ -20,3 +20,5 @@ Longer range:
 * Automatic provisioning
 * Automatic failover
 * Other frameworks and ORMs; probably starting with [Prisma](https://www.prisma.io/)
+* Instead of a config file in the source tree, perhas the configuration should be in some sort of key/value store allowing dynamic updates
+* Some sort of dashboard allowing the configuration to be updated using a web interface

@@ -3,6 +3,7 @@ package internal
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -69,6 +70,8 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // Note: this is a method of the Route struct, not Router
 func (route *Route) replay(w http.ResponseWriter, r *http.Request, field string, value string) {
+	slog.Info("Replaying request on", field, value)
+
 	if r.Method != "GET" && r.Method != "HEAD" {
 		if r.ContentLength < 0 || r.ContentLength > 1_000_000 {
 			if proxy == nil {

@@ -102,6 +102,10 @@ func NewConfig() (*Config, error) {
 		HealthCheckPath: defaultHealthCheckPath,
 	}
 
+	if os.Getenv("RAILS_ENV") == "production" {
+		config.HttpPort = 8080
+	}
+
 	settings.Server = config
 
 	data, err := os.ReadFile(configFile)

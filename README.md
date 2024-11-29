@@ -24,8 +24,6 @@ bin/rails generate atc
 
 Edit `config/atc.yml` as needed.
 
-Fly.io's dockerfile generators will be able to help with this.
-
 For approximately $1 US per month, you can run:
   * [1 performance machine with 2Gb of RAM, 10GB of bandwidth, and 5GB of storage for 15 hours/month](https://fly.io/calculator?m=0_0_0_0_0&f=c&b=iad.10&a=no_none&r=shared_0_1_iad&t=10_100_5&u=0_1_100&g=1_performance_15_1_2048_iad_1024_0).
   * [1 shared machine with 1Gb of RAM, 10GB of bandwidth, and 5GB of storage for 80 hours/month](https://fly.io/calculator?m=0_0_0_0_0&f=c&b=iad.10&a=no_none&r=shared_0_1_iad&t=10_100_5&u=0_1_100&g=1_shared_80_1_1048_iad_1024_0).

@@ -1,14 +1,14 @@
 Rails recently released [Rails 8.0: No PaaS Required](https://rubyonrails.org/2024/11/7/rails-8-no-paas-required).  Fly.io seeks to redefine PaaS.  Some questions to start with:
 
-* Would you rather pay $0.01/hour for a PaaS or €5/month for a VPS?
+* Would you rather pay [$0.01/hour](https://fly.io/calculator?f=c&b=iad.20&a=no_none&m=0_0_0_0_0&r=shared_0_1_iad&t=10_100_5&u=0_1_100&g=1_shared_100_1_512_iad_1024_0) for a PaaS or €5/month for a VPS?
 * Would you rather watch a [half hour video](https://world.hey.com/dhh/kamal-2-thou-need-not-paas-c9e8bd53) to plan your first deployment, or would you rather [launch now](https://fly.io/rails)?
 * Do you want to auto provision Active Storage, Active Job, Backups and more, or do you want to manually configure them later?
 
-Now lets dive deeper.
+With these questions in mind, lets dive deeper.
 
 # IaaS: Infrastructure as a Service
 
-Essentially, this is Virtual Private Servers (VPS) that you can rent.  Some of the bigger players include: Amazon Elastic Compute Cloud (EC2) and Google Compute Engine.  Rails
+Essentially, IaaS is Virtual Private Servers (VPS) that you can rent.  Some of the bigger players include: Amazon Elastic Compute Cloud (EC2) and Google Compute Engine.  Rails
 encourages Hetzner and Digital Ocean Droplets.
 
 Essentially, what you can get for a few Euros a month is root access to a virtual machine with an operating system installed and an IP address.  You request one and it is ready in minutes.
@@ -28,8 +28,8 @@ set of services.
 
 Rails 8 provides a Dockerfile and a tool named Kamal that will configure and deploy your application to a standard VPS.  You are still responsible for firewalls, load balancers, backups, databases, and more.
 
-Fly launch can deploy your application using the exact same Dockerfiles that Kamal uses.
-We provide the firewalls, load balancers, backups, databases, and more.
+Fly launch can deploy your application [in datacenters around the world, on servers we run ourselves](https://fly.io/docs/reference/regions/), using the exact same Dockerfiles that Kamal uses.
+We provide firewalls, load balancers, backups, databases, and more.
 
 # Sidebar: Rails 8 doesn't require a PaaS.  
 
@@ -48,9 +48,7 @@ The choice is yours to make.
 
 # SaaS: Software as a Service
 
-This is where you come in.  Fly.io is a Developer-Focused Public Cloud.  You write
-software.  You write software, and want to make it available online as a service.  That's
-our specialty.
+This is where you come in.  Fly.io is a Developer-Focused Public Cloud.  You write software and want to make it available online as a service.  That's our specialty.
 
 Wikipedia on [Software as a service](https://en.wikipedia.org/wiki/Software_as_a_service):
   * by 2023 was the main form of software application deployment

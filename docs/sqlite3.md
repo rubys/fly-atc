@@ -1,3 +1,5 @@
+Be sure that sqlite3 is right for you - it might not be!
+
 ### Background information
 
 [Supercharge the One Person Framework with SQLite: Rails World 2024](https://fractaledmind.github.io/2024/10/16/sqlite-supercharges-rails/)

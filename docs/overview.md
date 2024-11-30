@@ -6,7 +6,7 @@ Hi, I'm Sam Ruby:
 
 My showcase software has been used in production for almost 3 years.  Originally hosted on my mac-mini in my attic and used for local events in the mid-atlantic states, it now runs on fly.io and is used by 50 dance studios in 5 countries on 3 continents.
 
-I've written up and given presentations on the current architecture: [Shared Nothing](https://fly.io/docs/blueprints/shared-nothing/), and in the spirit of Rails, am in the process of extracting the code into a toolkit that can be used by others.
+I've documented my [current architecture](https://github.com/rubys/showcase/blob/main/ARCHITECTURE.md) and published a blueprint: [Shared Nothing](https://fly.io/docs/blueprints/shared-nothing/), and in the spirit of Rails, am now in the process of extracting the code into a toolkit that can be used by others.
 
 fly-atc is the result.
 
@@ -29,8 +29,6 @@ The focus of this toolkit is efficient, siloed, multi-tenant applications *with 
 * [SQLite ready for production](https://rubyonrails.org/2024/11/7/rails-8-no-paas-required#getting-sqlite-ready-for-production) - raw performance coupled with operational compression of complexity; see [Supercharge the One Person Framework with SQLite: Rails World 2024](https://fractaledmind.github.io/2024/10/16/sqlite-supercharges-rails/).
 * [Litestream](https://litestream.io/) -  No-worry backups.  Virtual machines can be literally destroyed and recreated elsewhere and start back up exactly where they left off.
 * [Tigris Global Storage](https://fly.io/docs/tigris/) - globally caching, S3-compatible object storage.
-
-That's a lot of moving parts.  I've documented my [current architecture](https://github.com/rubys/showcase/blob/main/ARCHITECTURE.md) and published a [blueprint](https://fly.io/docs/blueprints/shared-nothing/).
 
 The goal of fly-atc is to enable you configure multiple tenants and then not worry about this further, enabling you to focus on your application.
 

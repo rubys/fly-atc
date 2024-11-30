@@ -42,8 +42,8 @@ type Config struct {
 	UpstreamCommand string   `yaml:"upstream_command"`
 	UpstreamArgs    []string `yaml:"upstream_args"`
 
-	CacheSizeBytes        int  `yaml:"cache_size_bytes"`
-	MaxCacheItemSizeBytes int  `yaml:"max_cache_item_size_bytes"`
+	CacheSizeBytes        int  `yaml:"cache_size"`
+	MaxCacheItemSizeBytes int  `yaml:"max_cache_item_size"`
 	XSendfileEnabled      bool `yaml:"x_sendfile_enabled"`
 	MaxRequestBody        int  `yaml:"max_request_body"`
 
@@ -116,6 +116,10 @@ func NewConfig() (*Config, error) {
 		}
 	}
 
+	if getEnvBool("DEBUG", false) {
+		config.LogLevel = slog.LevelDebug
+	}
+
 	config.TargetPort = getEnvInt("TARGET_PORT", config.TargetPort)
 	config.CacheSizeBytes = getEnvInt("CACHE_SIZE", config.CacheSizeBytes)
 	config.MaxCacheItemSizeBytes = getEnvInt("MAX_CACHE_ITEM_SIZE", config.MaxCacheItemSizeBytes)
@@ -126,10 +130,8 @@ func NewConfig() (*Config, error) {
 	config.HttpIdleTimeout = getEnvDuration("HTTP_IDLE_TIMEOUT", config.HttpIdleTimeout)
 	config.HttpReadTimeout = getEnvDuration("HTTP_READ_TIMEOUT", config.HttpReadTimeout)
 	config.HttpWriteTimeout = getEnvDuration("HTTP_WRITE_TIMEOUT", config.HttpWriteTimeout)
-
-	if getEnvBool("DEBUG", false) {
-		config.LogLevel = slog.LevelDebug
-	}
+	config.LogLevel = slog.Level(getEnvInt("LOG_LEVEL", int(config.LogLevel)))
+	config.HealthCheckPath = getEnvString("HEALTH_CHECK_PATH", config.HealthCheckPath)
 
 	if len(os.Args) >= 2 {
 		config.UpstreamCommand = os.Args[1]
@@ -142,6 +144,7 @@ func NewConfig() (*Config, error) {
 		settings.Routes = append(settings.Routes, Route{
 			Name:     "",
 			Endpoint: "",
+			Database: getEnvString("RAILS_ENV", "development"),
 		})
 	}
 

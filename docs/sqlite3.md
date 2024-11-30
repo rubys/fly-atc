@@ -11,5 +11,5 @@
 * For single machine, single tenant, applications sqlite3 is an excellent choice in that it provides excellent vertical scalability.  For backups, use [litestream](https://litestream.io/); if/when a machine or volume fails simply start up a new one.  This provides failover, but not automatic failover.
 * For multi-tenant machines with readily partitionable data stores, horizontal scalability can be achieved by dynamically routing requests.  This can also improve responsiveness by placing applications near users.
 * For applications with data that is not readily partitionable, where reads dominate write requests, consider
-[LiteFS](https://fly.io/docs/litefs/).
+[LiteFS](https://fly.io/docs/litefs/).  A [built in HTTP proxy](https://fly.io/docs/litefs/proxy/) is provided for web applications; background jobs require [write forwarding](https://github.com/superfly/litefs/issues/56).
 * For all other uses, [PostgreSQL](https://www.postgresql.org/) is recommended.

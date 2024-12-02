@@ -1,6 +1,9 @@
 # fly-atc
 
-A SaaS toolkit for converting a personal application into a efficient, siloed, multi-tenant application, where each user of your application is assigned a dedicated virtual machine.
+* A SaaS toolkit for converting a personal application into a efficient, siloed, multi-tenant application, where each user of your application is assigned a dedicated virtual machine.
+* Zero-config no-worry sqlite3 backups using Litestream
+
+Currently supports Rails and fly.io; looking for collaborators to expand to other frameworks and platforms.
 
 *** **Work in Progress** ***
 

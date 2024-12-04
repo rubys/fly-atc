@@ -4,6 +4,8 @@ Be sure that sqlite3 is right for you - it might not be!
 
 [Supercharge the One Person Framework with SQLite: Rails World 2024](https://fractaledmind.github.io/2024/10/16/sqlite-supercharges-rails/)
 
+[What you need to know about SQLir](https://joyofrails.com/articles/what-you-need-to-know-about-sqlite)
+
 * SQLite3 "out of the box" is not suited for production, but by fine tuning the configuration and usage it is.  [Rails 8](https://rubyonrails.org/2024/11/7/rails-8-no-paas-required) does both.
 * When running SQLite3 in production, you need to have a solid backup mechanism setup.
 * Sqlite3 only supports linear writes, but performs 10 to 600 times faster than Postgres.
